@@ -4,14 +4,28 @@ val filename = "input.txt"
 
 val line = Source.fromFile(filename).getLines.toList.apply(0)
 var numbers = line.split(",").map(_.toInt).toList
-println(doCalc(12, 2, numbers))
-println("")
+val answer = findSolution(0, 0, numbers)
+println(answer._1 * 100 + answer._2)
 
+def findSolution(input1: Int, input2: Int, instructions: List[Int]) : Tuple2[Int, Int] = {
+    val answer = 19690720
+    
+    if (doCalc(input1, input2, instructions) == answer) {
+        return (input1, input2) 
+    } else if (input1 < 99) {
+        return findSolution(input1 + 1, input2, instructions)
+    }
+    else if (input1 == 99 && input2 < 99) {
+       return findSolution(0, input2 + 1, instructions)    
+    }
+    return (-1, -1) 
+}
 def doCalc(input1: Int, input2: Int, instructions: List[Int]) : Int = {
     var updatedInstructions = instructions
     updatedInstructions = updatedInstructions.updated(1, input1)
     updatedInstructions = updatedInstructions.updated(2, input2)
     updatedInstructions = processInstruction(0, updatedInstructions)
+    println(s"input1: $input1 input2: $input2 answer: ${updatedInstructions(0)}")
     updatedInstructions(0)
 }
 
