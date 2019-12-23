@@ -7,8 +7,9 @@ var numbers = line.split(",").map(_.toInt).toList
 numbers = numbers.updated(1, 12)
 numbers = numbers.updated(2, 2)
 numbers = processInstruction(0, numbers)
-numbers.foreach(x => print(x + " "))
-println("")
+//numbers.foreach(x => print(x + " "))
+//:println("")
+println(numbers(0))
 
 def processInstruction(startPosition: Int, instructions: List[Int]): List[Int] = {
     val opCode = instructions(startPosition)
