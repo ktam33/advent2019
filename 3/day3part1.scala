@@ -5,10 +5,12 @@ val filename = "input.txt"
 val input = Source.fromFile(filename).getLines.toList
 val wire1 = input(0).split(",").toList
 val wire2 = input(1).split(",").toList
-println(wire1)
-println(wire2)
-
-println(getPoints((0,0), wire1))
+//println(wire1)
+//println(wire2)
+val wire1Points = getPoints((0,0), wire1)
+val wire2Points = getPoints((0,0), wire2)
+val commonPoints = wire1Points.intersect(wire2Points)
+println(commonPoints.map(x => x._1.abs + x._2.abs).toList.sorted)
 
 def getPoints(startPoint: Tuple2[Int, Int], directions: List[String]): Set[Tuple2[Int, Int]] = {
     var result = Set[Tuple2[Int, Int]]()
