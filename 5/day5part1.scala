@@ -10,73 +10,66 @@ object AdventComputer {
         numbers = numbers.updated(2, 2)
         numbers = processInstruction(0, numbers)
         println(numbers(0))
+        println(numbers)
     }
     
     def processInstruction(startPosition: Int, instructions: List[Int]): List[Int] = {
-        val opCode = InstructionFactory.getIntInstruction(instructions(startPosition))
-        opCode match {
-            case 99 => instructions
-            case 1 => processInstruction(startPosition + 4, doOp(startPosition, instructions, addOp))
-            case 2 => processInstruction(startPosition + 4, doOp(startPosition, instructions, multiplyOp))
+        val instruction = InstructionFactory.getInstruction(startPosition, instructions)
+        instruction match {
+            case EndInstruction() => instruction.execute(instructions)
+            case AddInstruction(_) | MultiplyInstruction(_) => processInstruction(startPosition + instruction.instructionSize, instruction.execute(instructions))
         }
     }
-
-    def doOp(startPosition: Int, instructions: List[Int], op: (Int, Int) => Int): List[Int] = {
-        val num1 = instructions(instructions(startPosition + 1))
-        val num2 = instructions(instructions(startPosition + 2))
-        val replacePosition = instructions(startPosition + 3)
-        instructions.updated(replacePosition, op(num1, num2))
-    }
-
-    def addOp(x: Int, y: Int): Int = { x + y }
-    def multiplyOp(x: Int, y: Int): Int = { x * y }
-
 }
 
 object InstructionFactory {
     def getIntInstruction(input: Int): Int = {input}
     def getInstruction(startPosition: Int, instructions: List[Int]): Instruction = {
-        val opCode = instructions(startPosition).toString.takeRight(2).toInt    
-        opCode match {
-            case 1 => AddInstruction(opCode, instructions)
-            case 2 => MultiplyInstruction(opCode, instructions)
+        val opCode = instructions(startPosition).toString
+        val paddedOpCode = ("0" * (5 - opCode.size)) + opCode
+
+        val instructionCode = instructions(startPosition).toString.takeRight(2).toInt    
+        instructionCode match {
+            case 1 => AddInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
+            case 2 => MultiplyInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
             case 99 => EndInstruction()
         }
     }
+
+    def getParameters(parameterCode: String, startPosition:Int, instructions: List[Int]) : List[Int] = {
+        parameterCode.reverse.zipWithIndex.map({case (code, index) => {
+            if (code == '1' || index == 2) {
+                instructions(startPosition + 1 + index) 
+            } else {
+                instructions(instructions(startPosition + 1 + index))
+            }
+        }}).toList
+    }
 }
 
-sealed abstract class Instruction(opCode: Int, instructions: List[Int]){
+sealed abstract class Instruction(val parameters: List[Int]){
     val instructionSize : Int
-    val parameters = getParameters(opCode)
-    
-    def this() = this(0, Nil)
-
-    private def getParameters(opCode: Int): List[Parameter] = {
-        List(new Parameter(1, false))
-    }
-
-    def execute(startPosition: Int) : List[Int]
+    def this() = this(Nil)
+    def execute(instructions: List[Int]) : List[Int]
 }
 
-case class AddInstruction(opCode: Int, instructions: List[Int]) extends Instruction(opCode, instructions) {
+case class AddInstruction(override val parameters: List[Int]) extends Instruction(parameters) {
     val instructionSize = 4
-    def execute(startPosition: Int): List[Int] = {
-        Nil
+    def execute(instructions: List[Int]): List[Int] = {
+        instructions.updated(parameters(2), parameters(0) + parameters(1))
     }
 }
 
-case class MultiplyInstruction(opCode: Int, instructions: List[Int]) extends Instruction(opCode, instructions) {
+case class MultiplyInstruction(override val parameters: List[Int]) extends Instruction(parameters) {
     val instructionSize = 4
-    def execute(startPosition: Int): List[Int] = {
-        Nil
+    def execute(instructions: List[Int]): List[Int] = {
+        instructions.updated(parameters(2), parameters(0) * parameters(1))
     }
 }
 
 case class EndInstruction() extends Instruction() {
     val instructionSize = 0
-    def execute(startPosition: Int): List[Int] = {
-        Nil
+    def execute(instructions: List[Int]): List[Int] = {
+        instructions
     }
 }
-
-class Parameter(value: Int, isImmediate: Boolean)
