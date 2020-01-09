@@ -34,10 +34,10 @@ object InstructionFactory {
         instructionCode match {
             case 1 => AddInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
             case 2 => MultiplyInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
-            case 3 => InputInstruction(List(instructions(startPosition + 1)), 8) 
+            case 3 => InputInstruction(List(instructions(startPosition + 1)), 5) 
             case 4 => OutputInstruction(getParameters(paddedOpCode.slice(2,3), startPosition, instructions))
-            case 5 => JumpIfTrueInstruction(getParameters(paddedOpCode.slice(2,4), startPosition, instructions))
-            case 6 => JumpIfFalseInstruction(getParameters(paddedOpCode.slice(2,4), startPosition, instructions))
+            case 5 => JumpIfTrueInstruction(getParameters(paddedOpCode.slice(1,3), startPosition, instructions))
+            case 6 => JumpIfFalseInstruction(getParameters(paddedOpCode.slice(1,3), startPosition, instructions))
             case 7 => LessThanInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
             case 8 => EqualToInstruction(getParameters(paddedOpCode.take(3), startPosition, instructions))
             case 99 => EndInstruction()
